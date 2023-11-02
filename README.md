@@ -1,14 +1,23 @@
-# University.KhNURE.NoSQL.Practice
+# University.KhNURE.DTaP.Practice
 
 ## What is the project about?
 
-Repository is for educational purpose - implementing practical tasks on the discipline *"NoSQL Databases"* in
+Repository is for educational purpose - implementing practical tasks on the discipline *"Design technologies and patterns"* in
 the university "[Kharkiv National University of Radio Electronics][1]".
 
 ## What is the purpose of this project?
 
-The **purpose** of the project is ***implementing simple web-application*** (warehouse),using a relational DB as a
-database first, and then switch to NoSQL(MongoDB).
+The **purpose** of the project is ***implementing simple web-application*** (warehouse) using different design patterns.
+
+### Used design patterns and architecture design:
+
+- Builder (*with future inheritance*)
+- DAO (Abstract factory)
+- PRG (Post-Redirect-Get)
+- IoC (Inversion of Control) container, DI (Dependency Injection)
+- Strategy
+- Thread-safe Connection Pool
+
 
 ## Getting Started
 
@@ -51,7 +60,7 @@ Project has been installed.
        command - `git init`.
     3. Adds this repository to yours with name `origin` (you can change it, if you want):
         ```
-       $ git remote add origin git@github.com:StasonMendelso/University.KhNURE.NoSQL.Practice.git
+       $ git remote add origin git@github.com:StasonMendelso/University.KhNURE.DTaP.Practice.git
        ```
        But you need configure your SSH connection to your GitHub profile in Git Bash. See more [here][7].
 
@@ -82,7 +91,7 @@ For running the database you can use MySQL Server or create your own database on
 using the [script](database/sql/creation_database.sql) file of creating the database.
 <br>
 **Note**: if you use another server not such
-MySQL you should change JDBC driver for working with it and configurate the connection to your
+MySQL you should change JDBC driver for working with it, maybe a code and configurate the connection to your
 server in appropriate [property file](src/main/resources/application.properties). If you change driver, you should
 make some changes in [pom.xml file](pom.xml)
 <br>

@@ -3,10 +3,10 @@ package ua.nure.st.kpp.example.demo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import ua.nure.st.kpp.example.demo.dao.DAOConfig;
+import ua.nure.st.kpp.example.demo.dao.implementation.mysql.MySqlDAOConfig;
 
 @SpringBootApplication
-@EnableConfigurationProperties(DAOConfig.class)
+@EnableConfigurationProperties(MySqlDAOConfig.class)
 public class DemoApplication {
 
 	public static void main(String[] args) {

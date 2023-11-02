@@ -1,22 +1,24 @@
-package ua.nure.st.kpp.example.demo.dao;
+package ua.nure.st.kpp.example.demo.dao.implementation.mysql;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "database")
-public class DAOConfig {
+public class MySqlDAOConfig {
     private String type;
     private String url;
     private String user;
     private String password;
+    private int poolSize;
+    private int maxPoolSize;
 
-    public DAOConfig() {
+    public MySqlDAOConfig() {
     }
 
-    public DAOConfig(String type) {
+    public MySqlDAOConfig(String type) {
         this.type = type;
     }
 
-    public DAOConfig(String type, String url, String user, String password) {
+    public MySqlDAOConfig(String type, String url, String user, String password) {
         this.type = type;
         this.url = url;
         this.user = user;
@@ -55,13 +57,31 @@ public class DAOConfig {
         this.password = password;
     }
 
+    public int getPoolSize() {
+        return poolSize;
+    }
+
+    public void setPoolSize(int poolSize) {
+        this.poolSize = poolSize;
+    }
+
+    public int getMaxPoolSize() {
+        return maxPoolSize;
+    }
+
+    public void setMaxPoolSize(int maxPoolSize) {
+        this.maxPoolSize = maxPoolSize;
+    }
+
     @Override
     public String toString() {
-        return "DAOConfig{" +
-                "type='" + type + '\'' +
-                ", url='" + url + '\'' +
-                ", user='" + user + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+        return "MySqlDAOConfig{" +
+               "type='" + type + '\'' +
+               ", url='" + url + '\'' +
+               ", user='" + user + '\'' +
+               ", password='" + password + '\'' +
+               ", poolSize=" + poolSize +
+               ", maxPoolSize=" + maxPoolSize +
+               '}';
     }
 }

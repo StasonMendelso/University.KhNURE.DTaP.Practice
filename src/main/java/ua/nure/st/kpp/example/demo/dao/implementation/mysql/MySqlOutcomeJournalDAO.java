@@ -63,9 +63,11 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
     @Override
     public Journal readAll() throws DAOException {
         Journal.Builder builder = new Journal.Builder<>();
-        try (Connection connection = mySqlConnectionUtils.getConnection();
-             Statement statement = connection.createStatement()) {
-            try (ResultSet resultSet = statement.executeQuery(Query.GET_ALL_RECORDS)) {
+        Connection connection = null;
+        try {
+            connection = mySqlConnectionUtils.getConnection();
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(Query.GET_ALL_RECORDS)) {
                 while (resultSet.next()) {
                     Item item = mapItem(resultSet);
                     Company company = mapCompany(resultSet);
@@ -78,6 +80,8 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
 
         } catch (SQLException exception) {
             throw new DAOException(exception);
+        }finally {
+            mySqlConnectionUtils.close(connection);
         }
         return builder.build();
     }
@@ -228,21 +232,26 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
 
     @Override
     public Record read(int id) throws DAOException {
-        try (Connection connection = mySqlConnectionUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(Query.GET_RECORD)) {
-            preparedStatement.setInt(1, id);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    Record record = mapRecord(resultSet);
-                    Company company = mapCompany(resultSet);
-                    Item item = mapItem(resultSet);
-                    record.setItem(item);
-                    record.setCompany(company);
-                    return record;
+        Connection connection = null;
+        try {
+            connection = mySqlConnectionUtils.getConnection();
+            try( PreparedStatement preparedStatement = connection.prepareStatement(Query.GET_RECORD)){
+                preparedStatement.setInt(1, id);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        Record record = mapRecord(resultSet);
+                        Company company = mapCompany(resultSet);
+                        Item item = mapItem(resultSet);
+                        record.setItem(item);
+                        record.setCompany(company);
+                        return record;
+                    }
                 }
             }
         } catch (SQLException exception) {
             throw new DAOException(exception);
+        }finally {
+            mySqlConnectionUtils.close(connection);
         }
         return null;
     }

@@ -1,29 +1,82 @@
 package ua.nure.st.kpp.example.demo.dao.implementation.mysql;
 
 import ua.nure.st.kpp.example.demo.dao.DAOException;
+import ua.nure.st.kpp.example.demo.dao.ItemDAO;
 import ua.nure.st.kpp.example.demo.dao.OutcomeJournalDAO;
+import ua.nure.st.kpp.example.demo.dao.implementation.mysql.observer.event.ItemDaoEvent;
+import ua.nure.st.kpp.example.demo.dao.implementation.mysql.observer.event.RecordDaoEvent;
 import ua.nure.st.kpp.example.demo.dao.implementation.mysql.util.MySqlConnectionUtils;
+import ua.nure.st.kpp.example.demo.dao.observable.ItemDaoObservable;
+import ua.nure.st.kpp.example.demo.dao.observable.OutcomeRecordDaoObservable;
+import ua.nure.st.kpp.example.demo.dao.observer.DaoEventType;
+import ua.nure.st.kpp.example.demo.dao.observer.ItemDaoObserver;
+import ua.nure.st.kpp.example.demo.dao.observer.OutcomeRecordDaoObserver;
 import ua.nure.st.kpp.example.demo.entity.Company;
 import ua.nure.st.kpp.example.demo.entity.Item;
 import ua.nure.st.kpp.example.demo.entity.Journal;
 import ua.nure.st.kpp.example.demo.entity.Record;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+
+public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO, OutcomeRecordDaoObservable, ItemDaoObservable {
     private final MySqlConnectionUtils mySqlConnectionUtils;
 
-    public MySqlOutcomeJournalDAO(MySqlConnectionUtils mySqlConnectionUtils) {
+    private final List<OutcomeRecordDaoObserver> outcomeRecordDaoObservers;
+    private final List<ItemDaoObserver> itemDaoObservers;
+    private final ItemDAO itemDAO;
 
+    public MySqlOutcomeJournalDAO(MySqlConnectionUtils mySqlConnectionUtils, ItemDAO itemDAO) {
         this.mySqlConnectionUtils = mySqlConnectionUtils;
+        this.itemDAO = itemDAO;
+        this.outcomeRecordDaoObservers = new LinkedList<>();
+        this.itemDaoObservers = new LinkedList<>();
+    }
+
+    @Override
+    public void notifyAll(ItemDaoEvent itemDaoEvent) {
+        Set<ItemDaoObserver> observersToNotify = itemDaoObservers.stream()
+                .filter(observer -> observer.containsAtLeastOneType(itemDaoEvent.getDaoEventType()))
+                .collect(Collectors.toSet());
+
+        observersToNotify.forEach(observer -> observer.notify(itemDaoEvent));
+    }
+
+    @Override
+    public void notifyAll(RecordDaoEvent recordDaoEvent) {
+        Set<OutcomeRecordDaoObserver> observersToNotify = outcomeRecordDaoObservers.stream()
+                .filter(observer -> observer.containsAtLeastOneType(recordDaoEvent.getDaoEventType()))
+                .collect(Collectors.toSet());
+
+        observersToNotify.forEach(observer -> observer.notify(recordDaoEvent));
+    }
+
+    @Override
+    public void subscribe(ItemDaoObserver itemDaoObserver) {
+        this.itemDaoObservers.add(itemDaoObserver);
+    }
+
+    @Override
+    public void subscribe(OutcomeRecordDaoObserver incomeRecordDaoObserver) {
+        this.outcomeRecordDaoObservers.add(incomeRecordDaoObserver);
+    }
+
+    @Override
+    public void unsubscribe(ItemDaoObserver itemDaoObserver) {
+        this.itemDaoObservers.remove(itemDaoObserver);
+    }
+
+    @Override
+    public void unsubscribe(OutcomeRecordDaoObserver incomeRecordDaoObserver) {
+        this.outcomeRecordDaoObservers.remove(incomeRecordDaoObserver);
     }
     private static class Query {
         public static final String INSERT_RECORD = "INSERT INTO outcome_journal(document_number, items_id, companies_id, date, price, amount) VALUES (?,?,?,?,?,?);";
@@ -40,7 +93,7 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
         Connection connection = null;
         try {
             connection = mySqlConnectionUtils.getConnection(true);
-            try (PreparedStatement preparedStatement1 = connection.prepareStatement(Query.INSERT_RECORD);
+            try (PreparedStatement preparedStatement1 = connection.prepareStatement(Query.INSERT_RECORD,RETURN_GENERATED_KEYS);
                  PreparedStatement preparedStatement2 = connection.prepareStatement(Query.UPDATE_ITEM_QUANTITY_SUBTRACTING_VALUE_BY_ID)) {
                 mapStatement(preparedStatement1, record);
 
@@ -48,12 +101,24 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
                 preparedStatement2.setInt(2, record.getItem().getId());
 
                 preparedStatement1.execute();
-                preparedStatement2.executeUpdate();
-                connection.commit();
-                return true;
+                try (ResultSet generatedKeys = preparedStatement1.getGeneratedKeys()) {
+                    if (!generatedKeys.next()) {
+                        connection.rollback();
+                        return false;
+                    }
+                    int recordId = generatedKeys.getInt(1);
+                    if (preparedStatement2.executeUpdate() > 0) {
+
+                        connection.commit();
+                        notifyAll(new RecordDaoEvent(DaoEventType.CREATE, read(recordId)));
+                        notifyAll(new ItemDaoEvent(DaoEventType.UPDATE, itemDAO.read(record.getItem().getId())));
+                        return true;
+                    }
+                }
             }
         } catch (SQLException exception) {
             mySqlConnectionUtils.rollback(connection);
+            throw  new DAOException(exception);
         } finally {
             mySqlConnectionUtils.close(connection);
         }
@@ -159,6 +224,14 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
                         preparedStatement4.setInt(2,record.getItem().getId());
                         preparedStatement4.executeUpdate();
                         connection.commit();
+
+                        notifyAll(new RecordDaoEvent(DaoEventType.UPDATE, read(id)));
+                        if(record.getItem().getId() == itemId){
+                            notifyAll(new ItemDaoEvent(DaoEventType.UPDATE, itemDAO.read(itemId)));
+                            return true;
+                        }
+                        notifyAll(new ItemDaoEvent(DaoEventType.UPDATE, itemDAO.read(record.getItem().getId())));
+                        notifyAll(new ItemDaoEvent(DaoEventType.UPDATE, itemDAO.read(itemId)));
                         return true;
                     }
                     return false;
@@ -167,10 +240,10 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
             }
         } catch (SQLException exception) {
             mySqlConnectionUtils.rollback(connection);
+            throw  new DAOException(exception);
         } finally {
             mySqlConnectionUtils.close(connection);
         }
-        return false;
     }
 
     private void mapUpdateStatement(PreparedStatement preparedStatement, int id, Record record) throws SQLException {
@@ -211,10 +284,15 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
                         preparedStatement2.setInt(1, amount);
                         preparedStatement2.setInt(2, itemId);
                         preparedStatement2.executeUpdate();
+                        Record beforeDelete = read(id);
+
                         preparedStatement3.setInt(1, id);
 
                         preparedStatement3.executeUpdate();
                         connection.commit();
+
+                        notifyAll(new RecordDaoEvent(DaoEventType.DELETE, beforeDelete));
+                        notifyAll(new ItemDaoEvent(DaoEventType.UPDATE, itemDAO.read(itemId)));
                         return true;
                     }
                     return false;
@@ -224,10 +302,10 @@ public class MySqlOutcomeJournalDAO implements OutcomeJournalDAO {
             }
         }catch (SQLException exception) {
             mySqlConnectionUtils.rollback(connection);
+            throw  new DAOException(exception);
         } finally {
             mySqlConnectionUtils.close(connection);
         }
-        return false;
     }
 
     @Override

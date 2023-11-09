@@ -17,6 +17,7 @@ The **purpose** of the project is ***implementing simple web-application*** (war
 - IoC (Inversion of Control) container, DI (Dependency Injection)
 - Strategy
 - Thread-safe Connection Pool
+- Observer
 
 
 ## Getting Started

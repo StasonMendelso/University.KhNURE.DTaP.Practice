@@ -18,6 +18,7 @@ The **purpose** of the project is ***implementing simple web-application*** (war
 - Strategy
 - Thread-safe Connection Pool
 - Observer
+- Web-sockets
 
 
 ## Getting Started

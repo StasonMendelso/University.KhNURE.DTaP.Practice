@@ -10,6 +10,7 @@ import ua.nure.st.kpp.example.demo.dao.implementation.mysql.MySqlDAOConfig;
 import ua.nure.st.kpp.example.demo.dao.implementation.mysql.MySqlDAOFactory;
 import ua.nure.st.kpp.example.demo.dao.implementation.mysql.util.BasicConnectionPool;
 import ua.nure.st.kpp.example.demo.dao.implementation.mysql.util.ConnectionPool;
+import ua.nure.st.kpp.example.demo.service.WebSocketService;
 
 import javax.naming.ConfigurationException;
 
@@ -20,10 +21,11 @@ public class DAOFactory implements Factory {
 
 	@Autowired
 	public DAOFactory(@Value("${database.type}") String databaseType,
-					  MySqlDAOConfig mySqlDAOConfig) {
+					  MySqlDAOConfig mySqlDAOConfig,
+					  WebSocketService webSocketService) {
 		if (TypeDAO.MySQL.name().equalsIgnoreCase(databaseType)) {
 			ConnectionPool connectionPool = new BasicConnectionPool(mySqlDAOConfig);
-			this.factory = new MySqlDAOFactory(connectionPool);
+			this.factory = new MySqlDAOFactory(connectionPool, webSocketService);
 		} else {
 			throw new RuntimeException(new ConfigurationException("Unknown DAO type: " + databaseType));
 		}

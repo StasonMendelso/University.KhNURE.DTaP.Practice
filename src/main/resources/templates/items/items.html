@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/headers::head(title='Items')"></head>
+<head>
+    <meta th:replace = "fragments/headers::head(title='Items')">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <script src="/js/item.js"></script>
+</head>
 <body>
 <nav th:replace="fragments/navbar::nav"></nav>
 <main class="container">
@@ -26,9 +31,9 @@
                     <th colspan="2">Actions</th>
                 </tr>
                 </thead>
-                <tbody>
-                <tr th:each="item : ${itemsList}">
-                    <th scope="row" th:utext="${item.getId()}">...</th>
+                <tbody id="items-table-body">
+                <tr th:each="item : ${itemsList}" th:attrappend="item-id=${item.getId()}">
+                    <td scope="row" th:utext="${item.getId()}">...</td>
                     <td th:utext="${item.getVendor()}">...</td>
                     <td th:utext="${item.getName()}">...</td>
                     <td th:utext="${item.getUnit()}">...</td>

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/headers::head(title='Items')"></head>
+<head>
+    <meta th:replace = "fragments/headers::head(title='Items')">
+</head>
 <body>
 <nav th:replace="fragments/navbar::nav"></nav>
 <main class="container">
     <div>
         <h2>Edit Item</h2>
         <form th:action="@{/items/{id}(id=${editItemForm.getId()})}" th:object="${editItemForm}" th:method="PATCH">
+            <input id="id" hidden th:value="${editItemForm.getId()}">
             <div class="form-group">
                 <label th:for="vendor">Item's Vendor</label>
                 <input type="text" class="form-control" placeholder="Enter item's vendor" th:field="*{vendor}"/>
@@ -32,10 +35,15 @@
                 <input type="number" class="form-control" placeholder="Enter reserve rate" th:field="*{reserveRate}"/>
                 <div class="error" th:if="${#fields.hasErrors('reserveRate')}" th:errors="*{reserveRate}">Reserve rate error</div>
             </div>
+            <div class="mt-1 mb-1">
+                <button type="button" class="btn btn-primary" id="previous">Назад</button>
+                <button type="button" class="btn btn-primary" id="next">Вперед</button>
+            </div>
             <div class="form-group pt-1">
                 <input type="submit" class="btn btn-success container" value="Save"/>
             </div>
         </form>
+        <script src="/js/itemEdit.js"></script>
     </div>
 </main>
 </body>

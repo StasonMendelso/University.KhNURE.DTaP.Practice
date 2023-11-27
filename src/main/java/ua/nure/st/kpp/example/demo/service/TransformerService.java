@@ -10,6 +10,10 @@ import ua.nure.st.kpp.example.demo.form.item.AddItemForm;
 import ua.nure.st.kpp.example.demo.form.item.EditItemForm;
 import ua.nure.st.kpp.example.demo.form.journal.AddRecordForm;
 import ua.nure.st.kpp.example.demo.form.journal.EditRecordForm;
+import ua.nure.st.kpp.example.demo.memento.EditItemFormState;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 public class TransformerService {
@@ -106,5 +110,27 @@ public class TransformerService {
                 .item(item)
                 .company(company)
                 .build();
+    }
+
+    public EditItemFormState toState(EditItemForm editItemForm){
+        return new EditItemFormState(
+                String.valueOf(editItemForm.getId()),
+                editItemForm.getVendor(),
+                editItemForm.getName(),
+                editItemForm.getUnit(),
+                editItemForm.getWeight().toString(),
+                String.valueOf(editItemForm.getReserveRate())
+        );
+    }
+
+    public EditItemForm toForm(EditItemFormState state) {
+        return new EditItemForm(
+                Integer.parseInt(state.getId()),
+                state.getVendor(),
+                state.getName(),
+                state.getUnit(),
+                BigDecimal.valueOf(Double.valueOf(state.getWeight())).setScale(4, RoundingMode.FLOOR),
+                Integer.parseInt(state.getReserveRate())
+        );
     }
 }

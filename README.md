@@ -19,6 +19,7 @@ The **purpose** of the project is ***implementing simple web-application*** (war
 - Thread-safe Connection Pool
 - Observer
 - Web-sockets
+- Memento
 
 
 ## Getting Started

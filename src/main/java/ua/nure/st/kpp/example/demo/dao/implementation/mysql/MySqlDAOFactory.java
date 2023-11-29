@@ -13,6 +13,7 @@ public class MySqlDAOFactory implements Factory {
     private final MySqlIncomeJournalDAO mySqlIncomeJournalDAO;
     private final MySqlOutcomeJournalDAO mySqlOutcomeJournalDAO;
 
+    private final MySqlUserDAO mySqlUserDAO;
 
 
     public MySqlDAOFactory(ConnectionPool connectionPool, WebSocketService webSocketService) {
@@ -46,6 +47,7 @@ public class MySqlDAOFactory implements Factory {
         this.mySqlOutcomeJournalDAO.subscribe(itemCreateDaoObserver);
         this.mySqlOutcomeJournalDAO.subscribe(itemDeleteDaoObserver);
 
+        this.mySqlUserDAO = new MySqlUserDAO(mySqlConnectionUtils);
     }
 
     @Override
@@ -66,6 +68,11 @@ public class MySqlDAOFactory implements Factory {
     @Override
     public OutcomeJournalDAO createOutcomeJournalDAO() {
         return mySqlOutcomeJournalDAO;
+    }
+
+    @Override
+    public UserDAO createUserDAO() {
+        return mySqlUserDAO;
     }
 
 }

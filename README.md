@@ -20,6 +20,8 @@ The **purpose** of the project is ***implementing simple web-application*** (war
 - Observer
 - Web-sockets
 - Memento
+- Proxy
+- Spring Security
 
 
 ## Getting Started

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/headers::head(title='Items')"></head>
+<body>
+<nav th:replace="fragments/navbar::nav"></nav>
+<main class="container">
+    <div>
+        <h2>Registration</h2>
+        <form th:action="@{/register}" th:object="${registrationForm}" th:method="POST">
+            <div class="form-group">
+                <label th:for="username">Username</label>
+                <input type="text" class="form-control" placeholder="Enter username" th:field="*{username}"/>
+            </div>
+            <div class="form-group">
+                <label th:for="name">Password</label>
+                <input type="password" class="form-control" placeholder="Enter password" th:field="*{password}"/>
+            </div>
+            <div class="form-group">
+                <label th:for="unit">Role</label>
+                <select type="text" class="form-control" th:field="*{role}">
+                    <option value="ADMIN">Admin</option>
+                    <option value="USER" selected>User</option>
+                </select>
+            </div>
+            <div>
+                <a th:href="@{/login}">Login</a>
+            </div>
+            <div class="form-group pt-1">
+                <input type="submit" class="btn btn-success container" value="Register"/>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>

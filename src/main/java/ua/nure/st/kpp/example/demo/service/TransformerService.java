@@ -4,12 +4,15 @@ import org.springframework.stereotype.Service;
 import ua.nure.st.kpp.example.demo.entity.Company;
 import ua.nure.st.kpp.example.demo.entity.Item;
 import ua.nure.st.kpp.example.demo.entity.Record;
+import ua.nure.st.kpp.example.demo.entity.Role;
+import ua.nure.st.kpp.example.demo.entity.User;
 import ua.nure.st.kpp.example.demo.form.company.AddCompanyForm;
 import ua.nure.st.kpp.example.demo.form.company.EditCompanyForm;
 import ua.nure.st.kpp.example.demo.form.item.AddItemForm;
 import ua.nure.st.kpp.example.demo.form.item.EditItemForm;
 import ua.nure.st.kpp.example.demo.form.journal.AddRecordForm;
 import ua.nure.st.kpp.example.demo.form.journal.EditRecordForm;
+import ua.nure.st.kpp.example.demo.form.user.RegistrationForm;
 import ua.nure.st.kpp.example.demo.memento.EditItemFormState;
 
 import java.math.BigDecimal;
@@ -131,6 +134,14 @@ public class TransformerService {
                 state.getUnit(),
                 BigDecimal.valueOf(Double.valueOf(state.getWeight())).setScale(4, RoundingMode.FLOOR),
                 Integer.parseInt(state.getReserveRate())
+        );
+    }
+
+    public User toUser(RegistrationForm registrationForm) {
+        return  new User(
+                registrationForm.getUsername(),
+                registrationForm.getPassword(),
+                Role.getInstance(registrationForm.getRole())
         );
     }
 }

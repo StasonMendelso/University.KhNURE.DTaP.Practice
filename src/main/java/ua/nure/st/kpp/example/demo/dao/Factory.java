@@ -6,4 +6,6 @@ public interface Factory {
     CompanyDAO createCompanyDAO();
     IncomeJournalDAO createIncomeJournalDAO();
     OutcomeJournalDAO createOutcomeJournalDAO();
+
+    UserDAO createUserDAO();
 }

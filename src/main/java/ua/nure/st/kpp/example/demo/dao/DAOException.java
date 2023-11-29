@@ -6,6 +6,10 @@ public class DAOException extends SQLException {
         super(exception);
     }
 
+    public DAOException(String reason) {
+        super(reason);
+    }
+
     @Override
     public String toString() {
         return "DBException{" +

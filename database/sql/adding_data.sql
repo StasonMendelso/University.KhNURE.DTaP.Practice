@@ -1,5 +1,9 @@
 USE warehouse;
 
+INSERT INTO role(role)
+VALUES ('ADMIN'),
+       ('USER');
+
 INSERT INTO units(unit)
 VALUES('kg'),
       ('apiece'),
